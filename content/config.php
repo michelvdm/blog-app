@@ -13,7 +13,7 @@ return array(
 		'title'=>'The blog title', 
 		'desc'=>'The blog description'
 	),
-	'adminUrl'=>'https://admin.url',
+	'adminUrl'=>'http://wd-admin.dev',
 	'previewUrl'=>'http://127.0.0.1',
 	'template'=>'template.html',
 	'menu'=>array(
