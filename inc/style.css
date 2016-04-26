@@ -16,7 +16,7 @@ header i svg{margin:0}
 .github,.github:hover{background:#000}
 .facebook,.facebook:hover{background:#3b5998}
 
-p{margin-bottom:1em}
+p,ol li{margin-bottom:1em}
 .info{font-size:smaller;margin:5px 0;font-weight:bold;color:#727272}
 .intro{font-size:1.1em;color:#727272;font-style:italic;margin-top:1em}
 
