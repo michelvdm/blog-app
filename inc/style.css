@@ -57,7 +57,7 @@ p > code,li > code{background:#f0f0f0;padding:2px 10px}
 .pagination .on{color:#ff9800}
 
 /* prism.js default theme for JavaScript, CSS and HTML - Based on dabblet (http://dabblet.com) - author Lea Verou */
-pre[class*="language-"],.debug{font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;background:#f0f0f0;padding:1em;margin:.5em 0;white-space:pre-wrap}
+pre[class*="language-"],.debug{font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;background:#f0f0f0;padding:1em;margin:.5em 0;white-space:pre-wrap;word-wrap:break-word}
 pre code{color:#000}
 .token.comment,.token.prolog,.token.doctype,.token.cdata{color:#708090}
 .token.punctuation{color:#999}
