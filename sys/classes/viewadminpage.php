@@ -29,6 +29,19 @@ class ViewAdminPage extends ViewPage{
 		out( "<div class=\"act\">$cancel<button type=\"submit\">$label</button></div>\n</form>" );
 	}
 
+	function renderLogin(){
+			echo <<<EOT
+<div class="ovl"><form method="POST">
+	<h2>Log in</h2>
+	<ul>
+		<li><label for="fUser">User: </label><input name="user" id="fUser" autofocus required></li> 
+		<li><label for="fPassword">Password: </label><input name="password" id="fPassword" type="password" required></li> 
+	</ul>
+	<div class="act"><button type="submit">Submit</button></div>
+</form></div>
+EOT;
+	}
+
 	function renderNewPost(){
 		$now=date_create()->format('Y-m-d H:i:s');
 		$this->startForm();
@@ -63,49 +76,36 @@ class ViewAdminPage extends ViewPage{
 		$this->endForm(ROOT.'/post/'.$slug, 'OK');
 	}
 
-	function render(){
+	function process( $val ){
 		extract( $this->data );
-		$path=ROOT;
-		$pageTitle=$app['title'];
-		echo <<<EOT
-<!DOCTYPE html><html lang="en"><meta charset="utf-8">
-<title>$pageTitle Admin</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="$path/inc/favicon.ico">
-<link rel="stylesheet" href="$path/inc/style.css">
-<link rel="stylesheet" href="$path/inc/admin.css">
-
-EOT;
-		if($type=='login'){
-			echo <<<EOT
-<div class="ovl"><form method="POST">
-	<h2>Log in</h2>
-	<ul>
-		<li><label for="fUser">User: </label><input name="user" id="fUser" autofocus required></li> 
-		<li><label for="fPassword">Password: </label><input name="password" id="fPassword" type="password" required></li> 
-	</ul>
-	<div class="act"><button type="submit">Submit</button></div>
-</form></div>
-EOT;
-			die();
+		$tmp=explode( '{{', $val );
+		echo $tmp[0];
+		for( $i=1; $i< sizeof($tmp); $i++){
+			$tmp2=explode( '}}', $tmp[ $i ] );
+			switch($tmp2[0]){
+				case 'path': echo ROOT; break;
+				case 'renderTime': echo round( microtime( true )-START_TIME , 3 ); break;
+				case 'pageTitle': echo $app['title'].' Admin'; break;
+				case 'previewPath': echo $preview.ROOT; break; 
+				case 'userName': echo $user; break; 
+				case 'title': echo isset($title)?$title:'Error: title is missing'; break;
+				case 'content': 
+					if($type=='login') $this->renderLogin();
+					else{
+						out( '<article>' );
+						out( $message );
+						$this->renderActions( $actions );
+						out( '<h1>'.$title.'</h1>' );
+						$fn='render'.ucfirst($type);
+						if( method_exists( __CLASS__,  $fn ) ) call_user_func( array( $this, $fn ) );
+						else out( '<p>Error - no page method: '.$fn.'</p>' );
+						out( '</article>' );
+					}
+					break;
+				default: out( 'Error - no rule for key: '.$tmp2[0] ); 
+			}
+			echo $tmp2[1];
 		}
-
-		echo <<<EOT
-<header><div>
-	<a href="$path/" class="on">{$app['title']} Admin</a><a href="$preview$path/" target="preview">Preview</a>
-	<div class="user">$user <a href="$path/logout">Log out</a></div>
-</div></header>
-
-<article>
-$message
-EOT;
-		$this->renderActions( $actions );
-		out( '<h1>'.$title.'</h1>' );
-		$fn='render'.ucFirst($type);
-		if( method_exists( __CLASS__, $fn ) ) call_user_func( array( $this, $fn ) );
-		else out( 'Error - '.__CLASS__.' method does not exist: '.$fn );
-		out( '</article>'.PHP_EOL );
-		out( '<footer>Rendered in '.round( microtime( true )-START_TIME , 3 ).' sec.</footer>' );
 	}
 
 }

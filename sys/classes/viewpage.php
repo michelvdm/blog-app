@@ -108,10 +108,10 @@ class ViewPage{
 	function process( $val ){
 		extract( $this->data );
 		if( isset($type) && $type=='404' ) http_response_code(404);
-		$tmp=split( '{{', $val );
+		$tmp=explode( '{{', $val );
 		echo $tmp[0];
 		for( $i=1; $i< sizeof($tmp); $i++){
-			$tmp2=split( '}}', $tmp[ $i ] );
+			$tmp2=explode( '}}', $tmp[ $i ] );
 			switch($tmp2[0]){
 				case 'path': echo ROOT; break;
 				case 'renderTime': echo round( microtime( true )-START_TIME , 3 ); break;
@@ -132,9 +132,8 @@ class ViewPage{
 		}
 	}
 
-	function render(){
-		$file=BASE.'/content/'.$this->data['template'];
-		$this->process( file_get_contents( $file ) );
+	function render( $file ){
+		$this->process( file_get_contents( BASE.'/content/'.$file ) );
 	}
 
 }

@@ -99,7 +99,7 @@ class AdminController extends BlogController{
 		if( $this->method!='get' ) return;
 		$this->data['actions']=$this->actions;
 		$this->getMessage();
-		call_user_func( array( new ViewAdminPage( $this->data ), 'render' ) );
+		call_user_func( array( new ViewAdminPage( $this->data ), 'render' ), 'admintemplate.html' );
 	}
 
 }

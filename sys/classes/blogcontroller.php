@@ -41,7 +41,7 @@ class BlogController{
 	function handleRequest(){
 		$fn='get'.ucfirst( $this->request[0] );
 		call_user_func( array( $this, method_exists( __CLASS__, $fn )?$fn:'get404' ) );
-		call_user_func( array( new ViewPage( $this->data ), 'render' ) );
+		call_user_func( array( new ViewPage( $this->data ), 'render' ), $this->data['template'] );
 	}
 
 }
