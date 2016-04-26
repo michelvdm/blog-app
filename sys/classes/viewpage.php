@@ -6,6 +6,7 @@ class ViewPage{
 
 	function renderIndex(){
 		extract( $this->data );
+		if( sizeof( $content )==0 ) return out('<p>No items found.</p>');
 		out( '<ul class="list">' );
 		foreach( $content as $item ){
 			$dt=new DateTime( $item['publishdate'] );
