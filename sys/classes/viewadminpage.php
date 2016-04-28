@@ -43,13 +43,13 @@ EOT;
 	}
 
 	function renderNewPost(){
-		$now=date_create()->format('Y-m-d H:i:s');
+		$now=date_create();
 		$this->startForm();
 		out( '<ul>' );
 		$this->input('subject', 'Subject: ', '', 'autofocus required');
 		$this->area('description', 'Description: ');
-		$this->input('publishdate', 'Publish date: ', $now, 'type="datetime" required');
-		$this->input('slug', 'Slug: ', $now.'-', 'required');
+		$this->input('publishdate', 'Publish date: ', $now->format('Y-m-d H:i:s'), 'type="datetime" required');
+		$this->input('slug', 'Slug: ', $now->format('Y-m-d').'-', 'required');
 		$this->body('body', 'Body ');
 		out( '</ul>' );
 		$this->endForm(ROOT.'/');
