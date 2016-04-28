@@ -4,7 +4,7 @@ date_default_timezone_set( 'Europe/Brussels' );
 
 return array(
 	'db'=>array(
-		'name'=>'webdev', 
+		'name'=>'blogapp', 
 		'host'=>'localhost', 
 		'user'=>'root', 
 		'password'=>''
@@ -18,12 +18,24 @@ return array(
 	'template'=>'template.html',
 	'menu'=>array(
 			'index'=>array('link'=>'/', 'label'=>'<svg><use xlink:href="{{path}}/inc/icons.svg#home-icon"/></svg>Home'),
+			'search'=>array('link'=>'/search', 'label'=>'Search'),
 			'about'=>array('link'=>'/page/about', 'label'=>'About')
 		),
 	'admin'=>array(
-		'user'=>'yourmail.address@your-domain',
-		'name'=>'Your Name',
-		'password'=>'use extra/password.php to hash a password...'
+		'user'=>'admin@your-domain',
+		'name'=>'Admin',
+		'password'=>'$2a$08$WH9gIwgF2PVONEwiW/fTGeWhJkYBuBer5fdeF4wkxBYOnQgX/OW7i'
 		)
 );
 
+/* To use the admin pages for testing: 
+
+modify the hosts file to create a virtual domain 'wd-admin.dev'
+
+You can login to http://wd-admin.dev with: 
+	user name: admin@your-domain
+	password: password
+
+To hash a new password, use extra/password.php
+
+*/

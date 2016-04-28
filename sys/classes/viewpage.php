@@ -8,17 +8,33 @@ class ViewPage{
 		extract( $this->data );
 		if( sizeof( $content )==0 ) return out('<p>No items found.</p>');
 		out( '<ul class="list">' );
-		foreach( $content as $item ){
-			$dt=new DateTime( $item['publishdate'] );
-			out( '<li><a href="'.ROOT.'/post/'.$item['slug'].'">' );
-			out( '<div class="dateBlock"><b>'.$dt->format('Y').'</b><i>'.$dt->format('d').'</i>'.$dt->format('Y').'</div>' );
-			out( '<h2>'.$item['subject'].'</h2>' );
-			out( '<p class="info"> Published '.$this->friendlyDate( $dt).'.</p>' );
-			out( '<p>'.$item['description'].'</p>' );
-			out( '</a></li>' );
-		}
+		foreach( $content as $item ) $this->renderItem( $item );
 		out( '</ul>' );
 		$this->renderPagination( $pagination, '/index/' );
+	}
+
+	function renderSearch(){
+		extract( $this->data );
+		out('<form method="get" class="search">');
+		out('<input name="for" value="'.$this->data['searchTerm'].'">');
+		out('<button type="submit"><svg><use xlink:href="'.ROOT.'/inc/icons.svg#search-icon"/></svg></button>');
+		out('</form>');
+		if($searchTerm=='') return;
+		if( sizeof( $content )==0 ) return out('<p>No items found.</p>');
+		out( '<ul class="list">' );
+		foreach( $content as $item ) $this->renderItem( $item );
+		out( '</ul>' );
+		$this->renderPagination( $pagination, '/search/' );
+	}
+
+	function renderItem( $item ){
+		$dt=new DateTime( $item['publishdate'] );
+		out( '<li><a href="'.ROOT.'/post/'.$item['slug'].'">' );
+		out( '<div class="dateBlock"><b>'.$dt->format('Y').'</b><i>'.$dt->format('d').'</i>'.$dt->format('Y').'</div>' );
+		out( '<h2>'.$item['subject'].'</h2>' );
+		out( '<p class="info"> Published '.$this->friendlyDate( $dt).'.</p>' );
+		out( '<p>'.$item['description'].'</p>' );
+		out( '</a></li>' );
 	}
 
 	function friendlyDate( $time ){

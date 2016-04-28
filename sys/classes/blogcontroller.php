@@ -5,9 +5,10 @@ class BlogController{
 	function __construct($config){
 		$this->config=$config;
 		$this->request=explode( '/', ( isset( $_GET['url'] )?$_GET['url']:'index' ).'////' );
-		switch( $this->request[0] ){
-			case 'index': case 'post': $here='index'; break;
-			default: $here='about';
+		$here=$this->request[0];
+		switch( $here ){
+			case 'post': $here='index'; break;
+			case 'page': $here=$this->request[1]; break;
 		}
 		extract($config);
 		$this->data=array( 'app'=>$app, 'request'=>$this->request, 'template'=>$template, 'menu'=>$menu, 'topActive'=>$here );
@@ -19,6 +20,13 @@ class BlogController{
 	function getIndex(){
 		$obj=$this->model->getPosts( (int) $this->data['request'][1] );
 		$this->extendData( array( 'type'=>'index', 'title'=>'Recent posts', 'content'=>$obj['list'], 'pagination'=>$obj['pagination'] ) );
+	}
+
+	function getSearch(){
+		$url=$_SERVER['REQUEST_URI'];
+		$searchTerm=substr( $url, stripos( $url.'?for=', '?for=' )+5 );
+		$obj=( $searchTerm>'' )?$this->model->getSearch( $searchTerm, (int) $this->data['request'][2] ):array( 'list'=>array(), 'pagination'=>null );
+		$this->extendData( array( 'type'=>'search', 'title'=>'Search', 'searchTerm'=>$searchTerm, 'content'=>$obj['list'], 'pagination'=>$obj['pagination']  ) );	
 	}
 
 	function getPost(){

@@ -23,6 +23,17 @@ class BlogModel{
 		return array( 'list'=>$r->fetchAll( PDO::FETCH_ASSOC ), 'pagination'=>$pagination );
 	}
 
+	function getSearch( $term, $thisPage, $perPage=10 ){
+		$match='MATCH ( subject, description, body ) AGAINST ( :term IN BOOLEAN MODE )';
+		$r=$this->db->prepare( 'SELECT COUNT(*) FROM posts WHERE '.$match );
+		$r->execute( array( ':term'=>$term ) );
+		$count=$r->fetch()[0];
+		$pagination=$this->getPagination( $thisPage, $perPage, $count );
+		$r=$this->db->prepare( 'SELECT slug, subject, publishdate, description, body, '.$match.' AS score FROM posts WHERE '.$match.' ORDER BY score DESC'.$pagination['queryAdd'] );
+		$r->execute( array( ':term'=>$term ) );
+		return array( 'list'=>$r->fetchAll( PDO::FETCH_ASSOC ), 'pagination'=>$pagination );
+	}
+
 	function getPost( $slug ){
 		$r=$this->db->prepare( 'SELECT * from posts WHERE slug=:slug' );
 		$r->execute( array( ':slug'=>$slug ) );

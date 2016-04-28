@@ -64,7 +64,7 @@ EOT;
 		$this->area('description', 'Description: ', $description );
 		$this->input('publishdate', 'Publish date: ', $publishdate, 'type="datetime" required');
 		$this->input('slug', 'Slug: ', $slug, 'required');
-		$this->body('body', 'Body ', $body );
+		$this->body('body', 'Body ', str_replace( '&', '&amp;', $body ) );
 		out( '</ul>' );
 		$this->endForm(ROOT.'/post/'.$slug);
 	}
