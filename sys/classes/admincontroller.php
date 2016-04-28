@@ -5,6 +5,7 @@ class AdminController extends BlogController{
 	function __construct( $config ){
 		parent::__construct( $config ); 
 		$this->method=strtolower( $_SERVER['REQUEST_METHOD'] );
+		foreach( $_POST as $key=>$value ) if($key!='body')$_POST[$key]=filter_input( INPUT_POST, $key, FILTER_SANITIZE_STRIPPED );
 		session_set_cookie_params(60*60*24*365);
 		session_start();
 		$this->isLoggedIn=isset( $_SESSION[ 'userName' ] );
@@ -20,22 +21,23 @@ class AdminController extends BlogController{
 	}
 
 	function getMessage(){
-		$message='';
-		if( isset( $_SESSION['message'] ) ){
-			extract( $_SESSION['message'] );
-			$message="<div class=\"msg $type\">$text</div>";
-			unset($_SESSION['message']);
+		$key='message';
+		$value='';
+		if( isset( $_SESSION[ $key ] ) ){
+			extract( $_SESSION[ $key ] );
+			$value="<div class=\"msg $type\">$text</div>";
+			unset( $_SESSION[ $key ] );
 		}
-		$this->data['message']=$message;
+		$this->data[ $key ]=$value;
 	}
 
 	function addAction($link, $label){ $this->actions[]=array( 'link'=>$link, 'label'=>$label ); }
-	function extendData( $arr ){ foreach ($arr as $key => $value) $this->data[$key]=$value; }
+	function extendData( $arr ){ foreach( $arr as $key=>$value ) $this->data[ $key ]=$value; }
 	function getLogin(){ $this->data['type']='login'; }
 	function getLogout(){ session_destroy(); header('Location: '.ROOT.'/' ); }
 
 	function postLogin(){
-		extract($this->config['admin']);
+		extract( $this->config[ 'admin' ] );
 		$hash=new PasswordHash();
 		if( $user==$_POST['user'] && $hash->checkPassword( $_POST['password'], $password ) ){
 			$_SESSION[ 'userName' ]=$name;
@@ -46,13 +48,13 @@ class AdminController extends BlogController{
 	}
 
 	function getIndex(){
-		$obj=$this->model->getPosts( (int) $this->data['request'][1] );
+		$obj=$this->model->getPosts( (int) $this->request[1] );
 		$this->addAction( '/newPost', 'New Post' );
 		$this->extendData( array( 'type'=>'index', 'title'=>'Recent posts', 'content'	=>$obj['list'], 'pagination'=>$obj['pagination'] ) );
 	}
 
 	function getPost(){
-		$slug=$this->data['request'][1];
+		$slug=$this->request[1];
 		$item=$this->model->getPost( $slug );
 		if( !$item ) die('Error - item not found: '.$slug);
 		extract($item);
@@ -66,28 +68,27 @@ class AdminController extends BlogController{
 	function getNewPost(){ $this->extendData( array( 'type'=>'newPost', 'title'=>'New post' ) ); }
 
 	function postNewPost(){ 
-		$this->model->createPost($_POST); 
-		$this->goAndSay( '/post/'.$_POST['slug'], 'This post has been created.' ); 
+		$this->model->createPost( $_POST ); 
+		$this->goAndSay( '/post/'.$_POST[ 'slug' ], 'This post has been created.' ); 
 	}
 
 	function getEditPost(){ 
-		$slug=$this->data['request'][1]; 
-		$item=$this->model->getPost( $slug ); 
+		$item=$this->model->getPost( $this->request[1] ); 
 		$this->extendData( array( 'type'=>'editPost', 'title'=>$item['subject'].' (edit)', 'content'=>$item ) ); 
 	}
 
 	function postEditPost(){ 
-		$this->model->updatePost($_POST); 
+		$this->model->updatePost( $_POST ); 
 		$this->goAndSay('/post/'.$_POST['slug'], 'The post has been updated.' ); 
 	}
 
 	function getDeletePost(){ 
-		$item=$this->model->getPost( $this->data['request'][1] ); 
+		$item=$this->model->getPost( $this->request[1] ); 
 		$this->extendData( array( 'type'=>'deletePost', 'title'=>'Delete post "'.$item['subject'].'"?', 'content'=>$item ) ); 
 	}
 
 	function postDeletePost(){ 
-		$this->model->deletePost( $this->data['request'][1] ); 
+		$this->model->deletePost( $this->request[1] ); 
 		$this->goAndSay( '/', 'The post has been deleted.' ); 
 	}
 

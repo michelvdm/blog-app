@@ -4,7 +4,8 @@ class BlogController{
 
 	function __construct($config){
 		$this->config=$config;
-		$this->request=explode( '/', ( isset( $_GET['url'] )?$_GET['url']:'index' ).'////' );
+		$request=filter_input( INPUT_GET, 'url', FILTER_SANITIZE_STRIPPED );
+		$this->request=explode( '/', ($request==''?'index':$request).'////' );
 		$here=$this->request[0];
 		switch( $here ){
 			case 'post': $here='index'; break;
@@ -24,13 +25,13 @@ class BlogController{
 
 	function getSearch(){
 		$url=$_SERVER['REQUEST_URI'];
-		$searchTerm=substr( $url, stripos( $url.'?for=', '?for=' )+5 );
+		$searchTerm=filter_var( substr( $url, stripos( $url.'?for=', '?for=' )+5 ), FILTER_SANITIZE_STRIPPED );
 		$obj=( $searchTerm>'' )?$this->model->getSearch( $searchTerm, (int) $this->data['request'][2] ):array( 'list'=>array(), 'pagination'=>null );
 		$this->extendData( array( 'type'=>'search', 'title'=>'Search', 'searchTerm'=>$searchTerm, 'content'=>$obj['list'], 'pagination'=>$obj['pagination']  ) );	
 	}
 
 	function getPost(){
-		$slug=$this->data['request'][1];
+		$slug=$this->request[1];
 		$item=$this->model->getPost( $slug );
 		if( !$item ) return $this->get404();
 		$prevNext=$this->model->getPrevNext( $item['publishdate'] );
@@ -38,7 +39,7 @@ class BlogController{
 	}
 
 	function getPage(){
-		$file=BASE.'/content/page_'.$this->data['request'][1].'.php';
+		$file=BASE.'/content/page_'.$this->request[1].'.php';
 		if( !file_exists($file) )return $this->get404();
 		$item=require($file);
 		$this->extendData( array( 'type'=>'page', 'title'=>$item['subject'], 'content'=>$item['body'] ) );
