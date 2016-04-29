@@ -19,8 +19,23 @@ class BlogModel{
 	function getPosts( $thisPage, $perPage=10 ){
 		$count=$this->db->query( 'SELECT COUNT(*) FROM posts' )->fetch()[0];
 		$pagination=$this->getPagination( $thisPage, $perPage, $count );
-		$r=$this->db->query( 'SELECT slug, subject, publishdate, description from posts ORDER BY publishdate DESC'.$pagination['queryAdd'] );
+		$r=$this->db->query( 'SELECT slug, subject, publishdate, description, tags from posts ORDER BY publishdate DESC'.$pagination['queryAdd'] );
 		return array( 'list'=>$r->fetchAll( PDO::FETCH_ASSOC ), 'pagination'=>$pagination );
+	}
+
+	function getTags(){
+		$r=$this->db->query('SELECT LOWER(name) AS tag, name, count(*) AS count FROM tags GROUP BY tag ORDER BY name');
+		return $r->fetchAll( PDO::FETCH_GROUP | PDO::FETCH_UNIQUE );
+	}
+
+	function getTagged( $tag, $thisPage, $perPage=10 ){
+		$r=$this->db->prepare( 'SELECT COUNT(*) FROM tags WHERE LOWER(name)=:tag' );
+		$r->execute( array( ':tag'=>$tag ) );
+		$count=$r->fetch()[0];
+		$pagination=$this->getPagination( $thisPage, $perPage, $count );
+		$r=$this->db->prepare( 'SELECT slug, subject, publishdate, description, tags FROM tags a, posts b WHERE LOWER(name)=:tag AND a.postid=b.id ORDER BY publishdate DESC'.$pagination['queryAdd'] );
+		$r->execute( array( ':tag'=>$tag ) );
+		return array( 'list'=>$r->fetchAll( PDO::FETCH_ASSOC ), 'pagination'=>$pagination );	
 	}
 
 	function getSearch( $term, $thisPage, $perPage=10 ){
@@ -29,7 +44,7 @@ class BlogModel{
 		$r->execute( array( ':term'=>$term ) );
 		$count=$r->fetch()[0];
 		$pagination=$this->getPagination( $thisPage, $perPage, $count );
-		$r=$this->db->prepare( 'SELECT slug, subject, publishdate, description, body, '.$match.' AS score FROM posts WHERE '.$match.' ORDER BY score DESC'.$pagination['queryAdd'] );
+		$r=$this->db->prepare( 'SELECT slug, subject, publishdate, description, body, tags, '.$match.' AS score FROM posts WHERE '.$match.' ORDER BY score DESC'.$pagination['queryAdd'] );
 		$r->execute( array( ':term'=>$term ) );
 		return array( 'list'=>$r->fetchAll( PDO::FETCH_ASSOC ), 'pagination'=>$pagination );
 	}
@@ -49,6 +64,17 @@ class BlogModel{
 		}
 		return $prevNext;		
 	}
+
+	function getPrevNextTagged( $date, $tag ){
+		$prevNext=array( 'prev'=>null, 'next'=>null );
+		foreach( $prevNext as $key=>$value ){
+			$r=$this->db->prepare('SELECT slug,subject FROM tags a, posts b WHERE LOWER(name)=:tag AND a.postid=b.id AND publishdate'.($key=='prev'?'<':'>').':date ORDER BY publishdate '.($key=='prev'?'DESC':'').' LIMIT 1');
+			$r->execute( array( ':tag'=>$tag, ':date'=>$date ) );
+			$prevNext[ $key ]=$r->fetch(PDO::FETCH_ASSOC);
+		}
+		return $prevNext;
+	}
+
 
 }
 

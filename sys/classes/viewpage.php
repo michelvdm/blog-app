@@ -27,14 +27,47 @@ class ViewPage{
 		$this->renderPagination( $pagination, '/search/' );
 	}
 
-	function renderItem( $item ){
-		$dt=new DateTime( $item['publishdate'] );
-		out( '<li><a href="'.ROOT.'/post/'.$item['slug'].'">' );
+	function renderTags(){
+		extract( $this->data );
+		if( sizeof( $content )==0 ) return out('<p>No tags found.</p>');
+		out( '<ul class="tags">' );
+		foreach( $content as $key=>$item ){
+			extract( $item );
+			$link=ROOT.'/tag/'.$key;
+			$num=$count.' post'.( (int) $count==1?'':'s' );
+			out("<li><a href=\"$link\">$name - $num</a></li>");
+		} 
+		out( '</ul>' );
+	}
+
+	function renderTagged(){
+		extract( $this->data );
+		if( sizeof( $content )==0 ) return out('<p>No items found.</p>');
+		$link='/tag/'.$tag.'/post/';
+		out( '<ul class="list">' );
+		foreach( $content as $item ) $this->renderItem( $item, $link );	
+		out( '</ul>' );
+		$this->renderPagination( $pagination, '/tag/'.$tag.'/' );
+	}
+
+	function renderItem( $item, $link='/post/' ){
+		extract( $item );
+		$dt=new DateTime( $publishdate );
+		$link=ROOT.$link.$slug;
+		out( '<li><a href="'.$link.'">' );
 		out( '<div class="dateBlock"><b>'.$dt->format('Y').'</b><i>'.$dt->format('d').'</i>'.$dt->format('Y').'</div>' );
-		out( '<h2>'.$item['subject'].'</h2>' );
-		out( '<p class="info"> Published '.$this->friendlyDate( $dt).'.</p>' );
-		out( '<p>'.$item['description'].'</p>' );
-		out( '</a></li>' );
+		out( '<h2>'.$subject.'</h2></a>' );
+		out( '<p class="info"> Published '.$this->friendlyDate( $dt).'. '.$this->getTagLinks( $tags ).'</p>' );
+		out( '<p>'.$description.'</p>' );
+		out( '</li>' );
+	}
+
+	function getTagLinks( $val ){
+		$tags=array_filter( explode( ', ', $val ) );
+		if( sizeof( $tags )==0 ) return '';
+		return 'Tagged as '.implode(', ', array_map( function( $val ){ 
+			return '<a href="'.ROOT.'/tag/'.strtolower($val).'">'.$val.'</a>'; 
+		}, $tags ) );
 	}
 
 	function friendlyDate( $time ){
@@ -51,7 +84,7 @@ class ViewPage{
 	 	if( $j>2 ){
 			if( $j==3 && $difference==1 ) $text='yesterday at '. date( 'g:i a', $timestamp );
 			else if( $j==3 ) $text='last '.date('l \a\\t g:i a', $timestamp);
-			else if( $j<6 && !($j==5 && $difference==12 ) ) $text=date( 'F j \a\\t g:i a', $timestamp );
+			else if( $j<6 && !($j==5 && $difference==12 ) ) $text='on '.date( 'j F \a\\t g:i a', $timestamp );
 			else $text=date('F j, Y \a\\t g:i a', $timestamp);
 		}
 	 	return $text;
@@ -93,15 +126,15 @@ class ViewPage{
 	}
 
 	function renderPost(){
-		$item=$this->data['content'];
-		$dt=new DateTime( $item['publishdate'] );
-		out( '<p class="info">Published on '.$dt->format('l d F Y').'.</p>' );
-		out( '<p class="intro">'.$item['description'].'</p>' );
-		out( $item['body'] );
+		extract( $this->data['content'] );
+		$dt=new DateTime( $publishdate );
+		out( '<p class="info">Published on '.$dt->format('l d F Y').'. '.$this->getTagLinks( $tags ).'.</p>' );
+		out( '<p class="intro">'.$description.'</p>' );
+		out( $body );
 		out( '<nav class="prevNext">' );
-		foreach ($this->data['prevNext'] as $key => $value) {
+		foreach ($this->data['prevNext'] as $key=>$item ) {
 			$isNext=$key=='next';
-			if($value) out( '<a href="'.ROOT.'/post/'.$value['slug'].'" class="'.$key.'" title="'.($isNext?'Newer':'Older').'"><svg><use xlink:href="'.ROOT.'/inc/icons.svg#'.($isNext?'right':'left').'arrow-icon"/></svg>'.$value['subject'].'</a>' );
+			if($item) out( '<a href="'.ROOT.'/post/'.$item['slug'].'" class="'.$key.'" title="'.($isNext?'Newer':'Older').'"><svg><use xlink:href="'.ROOT.'/inc/icons.svg#'.($isNext?'right':'left').'arrow-icon"/></svg>'.$item['subject'].'</a>' );
 			else out( '<span class="'.$key.'"></span>' );	
 		}
 		echo '</nav>';
@@ -135,6 +168,7 @@ class ViewPage{
 				case 'meta':
 					out( '<title>'.$app['title'].($this->data['request'][0]=='index'?'':' | '.$title ).'</title>' );
 					out( '<meta name="description" value="'.( isset( $content['description'] )?$content['description']:$app['desc'] ).'">' );
+					if( $this->data['type']=='post' ) out( '<link rel="canonical" href="'.ROOT.'/post/'.$this->data['content']['slug'].'">' );
 					break;
 				case 'topNav': $this->renderTopNav(); break;
 				case 'title': echo isset($title)?$title:'Error: title is missing'; break;
@@ -143,6 +177,7 @@ class ViewPage{
 					if( method_exists( __CLASS__,  $fn ) ) call_user_func( array( $this, $fn ) );
 					else out( '<p>Error - no page method: '.$fn.'</p>' );
 					break;
+				case 'appName':echo APPNAME; break;
 				default: out( 'Error - no rule for key: '.$tmp2[0] ); 
 			}
 			echo $tmp2[1];

@@ -5,14 +5,27 @@ class AdminController extends BlogController{
 	function __construct( $config ){
 		parent::__construct( $config ); 
 		$this->method=strtolower( $_SERVER['REQUEST_METHOD'] );
-		foreach( $_POST as $key=>$value ) if($key!='body')$_POST[$key]=filter_input( INPUT_POST, $key, FILTER_SANITIZE_STRIPPED );
+		$here=$this->request[0];
+		switch( $here ){
+			case 'post': $here='index'; break;
+			case 'page': $here=$this->request[1]; break;
+			case 'tag': $here='tags'; break;
+		}
+		foreach( $_POST as $key=>$value ) if($key!='body' && !is_array($value) )$_POST[$key]=filter_input( INPUT_POST, $key, FILTER_SANITIZE_STRIPPED );
 		session_set_cookie_params(60*60*24*365);
 		session_start();
 		$this->isLoggedIn=isset( $_SESSION[ 'userName' ] );
 		$this->actions=array();
 		extract($config);
 		$this->model=new BlogAdminModel( $db );
-		$this->data=array(  'app'=>$app,  'preview'=>$previewUrl, 'request'=>$this->request, 'user'=>$this->isLoggedIn?$_SESSION[ 'userName' ]:'' );
+		$this->data=array( 
+			'app'=>$app,  
+			'preview'=>$previewUrl, 
+			'request'=>$this->request, 
+			'menu'=>$menu, 
+			'topActive'=>$here,
+			'user'=>$this->isLoggedIn?$_SESSION[ 'userName' ]:'' 
+		);
 	}
 
 	function goAndSay( $link, $text, $type='normal' ){ 
@@ -65,7 +78,25 @@ class AdminController extends BlogController{
 		$this->extendData( array( 'type'=>'post', 'title'=>$subject, 'content'=>$item, 'prevNext'=>$prevNext ) );
 	}
 
-	function getNewPost(){ $this->extendData( array( 'type'=>'newPost', 'title'=>'New post' ) ); }
+	function getTaggedPost( $tag ){
+		$slug=$this->request[3];
+		$item=$this->model->getPost( $slug );
+		if( !$item ) die('Error - item not found: '.$slug);
+		extract($item);
+		$prevNext=$this->model->getPrevNext( $publishdate );
+		$this->addAction( '/', 'Close' );
+		$this->addAction( '/editPost/'.$slug, 'Edit' );
+		$this->addAction( '/deletePost/'.$slug, 'Delete' );		
+		$this->extendData( array( 'type'=>'post', 'title'=>$subject, 'content'=>$item, 'prevNext'=>$prevNext ) );
+	}
+
+	function getNewPost(){ 
+		$this->extendData( array( 
+			'type'=>'newPost', 
+			'title'=>'New post', 
+			'tags'=>$this->model->getTags() 
+		) ); 
+	}
 
 	function postNewPost(){ 
 		$this->model->createPost( $_POST ); 
@@ -74,7 +105,12 @@ class AdminController extends BlogController{
 
 	function getEditPost(){ 
 		$item=$this->model->getPost( $this->request[1] ); 
-		$this->extendData( array( 'type'=>'editPost', 'title'=>$item['subject'].' (edit)', 'content'=>$item ) ); 
+		$this->extendData( array( 
+			'type'=>'editPost', 
+			'title'=>$item['subject'].' (edit)', 
+			'content'=>$item,
+			'tags'=>$this->model->getTags()  
+		) ); 
 	}
 
 	function postEditPost(){ 

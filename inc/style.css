@@ -1,4 +1,4 @@
-html,body,h1,h2,p,nav ul,form ul,.list{margin:0;padding:0;list-style:none}
+html,body,h1,h2,p,nav ul,form ul,.list,.tags{margin:0;padding:0;list-style:none}
 body,header > div{box-sizing:border-box;max-width:1024px;margin:auto;padding:0 10px;position:relative}
 body{font-family:Georgia,Utopia,Charter,serif;font-size:18px;color:#212121;line-height:1.4;margin-top:80px;overflow-y:scroll}
 h1,h2{line-height:1.2;font-weight:normal;color:#727272}
@@ -20,10 +20,10 @@ p{margin-bottom:1em}
 .info{font-size:smaller;margin:5px 0;font-weight:bold;color:#727272}
 .intro{font-size:1.1em;color:#727272;font-style:italic;margin-top:1em}
 
-.list a{display:block;text-decoration:none;color:inherit;border-bottom:solid 1px #b6b6b6;padding:8px 16px 4px 122px;position:relative;min-height:116px}
-.list li:last-child a{border:0}
-.list a:hover{background:#f0f0f0}
-.list :hover h2{color:#ff9800}
+.list li{display:block;border-bottom:solid 1px #b6b6b6;padding:8px 16px 4px 122px;position:relative;min-height:116px}
+.list li:last-child{border:0}
+.list a{text-decoration:none;color:#212121}
+.list :hover h2,.list a:hover{color:#ff9800}
 
 .dateBlock{position:absolute;top:12px;left:16px;width:90px;border:solid 1px #b6b6b6;text-align:center;margin-right:16px;border-radius:10px;font-size:15px;background:#fff}
 .dateBlock b,.dateBlock i{display:block}
@@ -73,7 +73,7 @@ pre code{color:#000}
 .token.entity{cursor:help}
 
 /* github link */
-.github-link{display:block;font-size:1.2em;color:#607d8b;text-decoration:none;padding-left:100px;line-height:80px;background:#f0f0f0 url(octocat.gif) 10px 8px no-repeat;margin:40px 0 20px 0}
+.github-link{display:block;font-size:1.2em;color:#607d8b;text-decoration:none;padding-left:100px;line-height:80px;background:#f0f0f0 url(octocat.gif) 10px 8px no-repeat;margin:40px 0 20px 0;border-radius:10px}
 .github-link:hover{color:#727272}
 
 /* search */
@@ -81,3 +81,7 @@ pre code{color:#000}
 .search input,.search button{display:inline-block;font-family:inherit;font-size:inherit;padding:15px;vertical-align:middle}
 .search button{padding:5px}
 .search svg{height:32px;width:32px}
+
+/* tags */
+.tags a{display:block;font-size:1.4em;color:#455a64;text-decoration:none;line-height:60px;padding:0 16px;border-bottom:solid 1px #b6b6b6}
+.tags a:hover{background:#f0f0f0}

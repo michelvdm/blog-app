@@ -1,14 +1,8 @@
-<?php /*
+<?php define( 'START_TIME', microtime( true ) );
 
- 	Minimal Blog App in PHP - Requires PHP 5.5 or higher
-	Author: Michel Van der Meiren - http://michelv.be/
-	2016-04-26 Version 1.1
-
-*/
-
-define( 'START_TIME', microtime( true ) );
 define( 'BASE', getcwd() );
 define( 'ROOT', dirname( $_SERVER[ 'PHP_SELF' ] )=='\\'?'':dirname( $_SERVER[ 'PHP_SELF' ] ) );
+define( 'APPNAME' , 'Minimal Blog App 1.4' );
 
 function out($val){ echo $val, PHP_EOL; }
 function debug( $val, $label='Debug' ){require(BASE.'/sys/debug.php');}

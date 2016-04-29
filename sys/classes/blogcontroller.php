@@ -10,24 +10,77 @@ class BlogController{
 		switch( $here ){
 			case 'post': $here='index'; break;
 			case 'page': $here=$this->request[1]; break;
+			case 'tag': $here='tags'; break;
 		}
 		extract($config);
-		$this->data=array( 'app'=>$app, 'request'=>$this->request, 'template'=>$template, 'menu'=>$menu, 'topActive'=>$here );
 		$this->model=new BlogModel( $db );
+		$this->data=array( 
+			'app'=>$app, 
+			'request'=>$this->request, 
+			'template'=>$template, 
+			'menu'=>$menu, 
+			'topActive'=>$here 
+		);
 	}
 
 	function extendData( $arr ){ foreach ($arr as $key => $value) $this->data[$key]=$value; }
 
 	function getIndex(){
 		$obj=$this->model->getPosts( (int) $this->data['request'][1] );
-		$this->extendData( array( 'type'=>'index', 'title'=>'Recent posts', 'content'=>$obj['list'], 'pagination'=>$obj['pagination'] ) );
+		$this->extendData( array( 
+			'type'=>'index', 
+			'title'=>'Recent posts', 
+			'content'=>$obj['list'], 
+			'pagination'=>$obj['pagination'] 
+		) );
 	}
 
 	function getSearch(){
 		$url=$_SERVER['REQUEST_URI'];
 		$searchTerm=filter_var( substr( $url, stripos( $url.'?for=', '?for=' )+5 ), FILTER_SANITIZE_STRIPPED );
 		$obj=( $searchTerm>'' )?$this->model->getSearch( $searchTerm, (int) $this->data['request'][2] ):array( 'list'=>array(), 'pagination'=>null );
-		$this->extendData( array( 'type'=>'search', 'title'=>'Search', 'searchTerm'=>$searchTerm, 'content'=>$obj['list'], 'pagination'=>$obj['pagination']  ) );	
+		$this->extendData( array( 
+			'type'=>'search', 
+			'title'=>'Search', 
+			'searchTerm'=>$searchTerm, 
+			'content'=>$obj['list'], 
+			'pagination'=>$obj['pagination']  
+		) );	
+	}
+
+	function getTags(){
+		$this->extendData( array( 
+			'type'=>'tags', 
+			'title'=>'Tags', 
+			'content'=>$this->model->getTags()  
+		) );		
+	}
+
+	function getTag(){
+		$tag=$this->request[1];
+		if($this->request[2]=='post') return $this->getTaggedPost( $tag );
+		$tags=$this->model->getTags();
+		$obj=$this->model->getTagged( $tag, $this->request[2] );
+		$this->extendData( array( 
+			'type'=>'tagged', 
+			'tag'=>$tag,
+			'title'=>'Posts tagged with "'.$tags[$tag]['name'].'"', 
+			'content'=>$obj['list'], 
+			'pagination'=>$obj['pagination']  
+		) );			
+	}
+
+	function getTaggedPost( $tag ){
+		$slug=$this->request[3];
+		$item=$this->model->getPost( $slug );
+		if( !$item ) return $this->get404();
+		$prevNext=$this->model->getPrevNextTagged( $item['publishdate'], $tag );
+		$this->extendData( array( 
+			'type'=>'post', 
+			'title'=>$item['subject'], 
+			'content'=>$item, 
+			'prevNext'=>$prevNext 
+		) );
 	}
 
 	function getPost(){
@@ -35,17 +88,32 @@ class BlogController{
 		$item=$this->model->getPost( $slug );
 		if( !$item ) return $this->get404();
 		$prevNext=$this->model->getPrevNext( $item['publishdate'] );
-		$this->extendData( array( 'type'=>'post', 'title'=>$item['subject'], 'content'=>$item, 'prevNext'=>$prevNext ) );
+		$this->extendData( array( 
+			'type'=>'post', 
+			'title'=>$item['subject'], 
+			'content'=>$item, 
+			'prevNext'=>$prevNext 
+		) );
 	}
 
 	function getPage(){
 		$file=BASE.'/content/page_'.$this->request[1].'.php';
 		if( !file_exists($file) )return $this->get404();
 		$item=require($file);
-		$this->extendData( array( 'type'=>'page', 'title'=>$item['subject'], 'content'=>$item['body'] ) );
+		$this->extendData( array( 
+			'type'=>'page', 
+			'title'=>$item['subject'], 
+			'content'=>$item['body'] 
+		) );
 	}
 
-	function get404(){ $this->extendData( array( 'type'=>'404', 'title'=>'404 error', 'content'=>'<p>The page you requested could not been found. </p>' ) ); }
+	function get404(){ 
+		$this->extendData( array( 
+			'type'=>'404', 
+			'title'=>'404 error', 
+			'content'=>'<p>The page you requested could not been found. </p>' 
+		) ); 
+	}
 
 	function handleRequest(){
 		$fn='get'.ucfirst( $this->request[0] );

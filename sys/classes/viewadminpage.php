@@ -24,6 +24,18 @@ class ViewAdminPage extends ViewPage{
 		out( '</select></li>' );
 	}
 
+	function selectTags($enum, $val='', $opt=''){
+		$val=explode( ', ', $val );
+		out( '<li class="checks"><span class="label">Tags: </span>' );
+		foreach ($enum as $key=>$value){
+			$name=$value['name'];
+			$checked=in_array( $name , $val )?' checked':''; 	
+			out( "<input id=\"fTag$name\" name=\"tags[]\" type=\"checkbox\" value=\"$name\"$checked><label for=\"fTag$name\">$name</label>" );
+		}
+		out('<br><label for="fNewTags" class="label">New tags: </label><input id="fNewTags" name="newTags">' );
+		out( '</li>' );
+	}
+
 	function endForm($back='', $label='Submit'){
 		$cancel=($back=='')?'':"<a href=\"$back\">Cancel</a> ";
 		out( "<div class=\"act\">$cancel<button type=\"submit\">$label</button></div>\n</form>" );
@@ -48,6 +60,7 @@ EOT;
 		out( '<ul>' );
 		$this->input('subject', 'Subject: ', '', 'autofocus required');
 		$this->area('description', 'Description: ');
+		$this->selectTags( $this->data['tags'] );
 		$this->input('publishdate', 'Publish date: ', $now->format('Y-m-d H:i:s'), 'type="datetime" required');
 		$this->input('slug', 'Slug: ', $now->format('Y-m-d').'-', 'required');
 		$this->body('body', 'Body ');
@@ -62,6 +75,7 @@ EOT;
 		out('<ul>' );
 		$this->input('subject', 'Subject: ', $subject, 'autofocus required' );
 		$this->area('description', 'Description: ', $description );
+		$this->selectTags( $this->data['tags'], $tags );
 		$this->input('publishdate', 'Publish date: ', $publishdate, 'type="datetime" required');
 		$this->input('slug', 'Slug: ', $slug, 'required');
 		$this->body('body', 'Body ', str_replace( '&', '&amp;', $body ) );
@@ -86,6 +100,7 @@ EOT;
 				case 'path': echo ROOT; break;
 				case 'renderTime': echo round( microtime( true )-START_TIME , 3 ); break;
 				case 'pageTitle': echo $app['title'].' Admin'; break;
+				case 'topNav': $this->renderTopNav(); break;
 				case 'previewPath': echo $preview.ROOT; break; 
 				case 'userName': echo $user; break; 
 				case 'title': echo isset($title)?$title:'Error: title is missing'; break;
@@ -102,6 +117,7 @@ EOT;
 						out( '</article>' );
 					}
 					break;
+				case 'appName': echo APPNAME; break;
 				default: out( 'Error - no rule for key: '.$tmp2[0] ); 
 			}
 			echo $tmp2[1];
