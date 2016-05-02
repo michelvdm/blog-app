@@ -74,7 +74,7 @@ class AdminController extends BlogController{
 		$prevNext=$this->model->getPrevNext( $publishdate );
 		$this->addAction( '/', 'Close' );
 		$this->addAction( '/editPost/'.$slug, 'Edit' );
-		$this->addAction( '/deletePost/'.$slug, 'Delete' );		
+		$this->addAction( '/deletePost/'.$id, 'Delete' );		
 		$this->extendData( array( 'type'=>'post', 'title'=>$subject, 'content'=>$item, 'prevNext'=>$prevNext ) );
 	}
 
@@ -119,7 +119,7 @@ class AdminController extends BlogController{
 	}
 
 	function getDeletePost(){ 
-		$item=$this->model->getPost( $this->request[1] ); 
+		$item=$this->model->getPostById( $this->request[1] ); 
 		$this->extendData( array( 'type'=>'deletePost', 'title'=>'Delete post "'.$item['subject'].'"?', 'content'=>$item ) ); 
 	}
 

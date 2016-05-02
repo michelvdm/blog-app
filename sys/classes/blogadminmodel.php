@@ -34,9 +34,17 @@ class BlogAdminModel extends BlogModel{
 		) );
 	}
 
-	function deletePost( $slug ){
-		$r=$this->db->prepare( 'DELETE FROM posts WHERE slug=:slug' );
-		return $r->execute( array( ':slug'=>$slug ) );
+	function getPostById( $id ){
+		$r=$this->db->prepare( 'SELECT * from posts WHERE id=:id' );
+		$r->execute( array( ':id'=>$id ) );
+		return $r->fetch( PDO::FETCH_ASSOC );	
+	}
+
+	function deletePost( $id ){
+		if( $id*1==0 ) die( 'Error: not a valid id: '.$id );
+		$this->db->query( 'DELETE FROM tags WHERE postid='.$id );
+		$r=$this->db->prepare( 'DELETE FROM posts WHERE id=:id' );
+		return $r->execute( array( ':id'=>$id ) );
 	}
 
 }
