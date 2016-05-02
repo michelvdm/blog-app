@@ -55,7 +55,7 @@ class ViewPage{
 		$dt=new DateTime( $publishdate );
 		$link=ROOT.$link.$slug;
 		out( '<li><a href="'.$link.'">' );
-		out( '<div class="dateBlock"><b>'.$dt->format('Y').'</b><i>'.$dt->format('d').'</i>'.$dt->format('Y').'</div>' );
+		out( '<div class="dateBlock"><b>'.$dt->format('F').'</b><i>'.$dt->format('d').'</i>'.$dt->format('Y').'</div>' );
 		out( '<h2>'.$subject.'</h2></a>' );
 		out( '<p class="info"> Published '.$this->friendlyDate( $dt).'. '.$this->getTagLinks( $tags ).'</p>' );
 		out( '<p>'.$description.'</p>' );
